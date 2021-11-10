@@ -8,7 +8,7 @@ import json
 
 AUTH0_DOMAIN = 'dev-djfincy3.us'
 ALGORITHMS = ['RS256']
-API_AUDIENCE = 'https://localhost:5000'
+API_AUDIENCE = 'http://localhost:5000'
 
 ## AuthError Exception
 '''
@@ -32,18 +32,14 @@ class AuthError(Exception):
     return the token part of the header
 '''
 def get_token_auth_header():
-    try:
-        auth = request.headers.get('Authorization', None)
-        if not auth:
-            raise AuthError({
-                'code': 'authorization_header_missing',
-                'description': 'Authorization header is expected.'
-            }, 401)
-    except:
-        raise Exception('Not Implemented')
-
-   # raise Exception('Not Implemented')
-
+    """Obtains the Access Token from the Authorization Header
+    """
+    auth = request.headers.get('Authorization', None)
+    if not auth:
+        raise AuthError({
+            'code': 'authorization_header_missing',
+            'description': 'Authorization header is expected.'
+        }, 401)
 
     parts = auth.split()
     if parts[0].lower() != 'bearer':
@@ -66,8 +62,6 @@ def get_token_auth_header():
 
     token = parts[1]
     return token
-
-
 
 
 '''
