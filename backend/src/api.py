@@ -54,7 +54,7 @@ def get_drinks():
 @app.route('/drinks-detail', methods=['GET'])
 @requires_auth('get:drinks-detail')
 
-def drinks_detail(jwt):
+def drinks_detail(payload):
     try:
         drinks = Drink.query.all()
         if drinks is None:
@@ -79,7 +79,7 @@ def drinks_detail(jwt):
 @app.route('/drinks', methods=['POST'])
 @requires_auth('post:drinks')
 
-def postDrinks(token):
+def postDrinks(payload):
 # Get Drink  from the POST body
     body = request.get_json()
 
