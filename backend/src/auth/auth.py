@@ -6,7 +6,7 @@ from urllib.request import urlopen
 import json 
 
 
-AUTH0_DOMAIN = 'dev-djfincy3.us'
+AUTH0_DOMAIN = 'dev-djfincy3.us.auth0.com'
 ALGORITHMS = ['RS256']
 API_AUDIENCE = 'http://localhost:5000'
 
