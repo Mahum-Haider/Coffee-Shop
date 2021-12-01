@@ -6,20 +6,19 @@ from flask_cors import CORS
 from urllib.request import urlopen
 from .database.models import db_drop_and_create_all, setup_db, Drink
 from .auth.auth import AuthError, requires_auth
+from flasgger import Swagger
 
 app = Flask(__name__)
 setup_db(app)
 CORS(app)
 
-
-
-
 '''
 @TODO uncomment the following line to initialize the datbase
-!! NOTE THIS WILL DROP ALL RECORDS AND START YOUR DB FROM SCRATCH
-!! NOTE THIS MUST BE UNCOMMENTED ON FIRST RUN
-!! Running this funciton will add one
+    !! NOTE THIS WILL DROP ALL RECORDS AND START YOUR DB FROM SCRATCH
+    !! NOTE THIS MUST BE UNCOMMENTED ON FIRST RUN
+    !! Running this funciton will add one
 '''
+
 db_drop_and_create_all()
 
 # ROUTES
@@ -29,9 +28,8 @@ db_drop_and_create_all()
         it should be a public endpoint
         it should contain only the drink.short() data representation
     returns status code 200 and json {"success": True, "drinks": drinks} where drinks is the list of drinks
-        or appropriate status code indicating reason for failure
+         or appropriate status code indicating reason for failure
 '''
-
 @app.route('/drinks', methods=['GET'])
 
 def getDrinks():
@@ -57,8 +55,6 @@ def getDrinks():
 def drinksDetail(payload):
     try:
         drinks = Drink.query.all()
-        if drinks is None:
-            abort(404)
 
         allDrinks = [drink.long() for drink in drinks]
         return jsonify({
@@ -67,6 +63,7 @@ def drinksDetail(payload):
         }), 200
     except:
         abort(422)
+
 
 '''
 @TODO implement endpoint
@@ -99,6 +96,10 @@ def postDrinks(payload):
         }), 200
     except:
         abort(422)
+
+
+
+
 '''
 @TODO implement endpoint
     PATCH /drinks/<id>
@@ -115,35 +116,39 @@ def postDrinks(payload):
 def patchDrinks(jwt, drink_id):
     body = request.get_json()
 
-    requestedId = body.get('id')
+    #requestedId = body.get('id')
     requestedTitle = body.get('title', None)
     requestedRecipe = body.get('recipe', None)
 
     try:
-        Drink(id=requestedId,
-            title=requestedTitle, 
-            recipe=json.dumps(requestedRecipe)).insert()
-        print('iAmWorking!')
-
         drinks = Drink.query.filter_by(id=drink_id).one_or_none()
-        if drinks is None:
-            abort(404)
+        drinks.title = requestedTitle
+        drinks.recipe = json.dumps(requestedRecipe)
+        drinks.update()
+        print('yesss')
+
+        # drinks = Drink.query.filter_by(id=drink_id).one_or_none()
+        # if drinks is None:
+        #     abort(404)
 
         if (requestedTitle or requestedRecipe) is None:
             abort(400)
 
-        drinks.update()
-
-        updatedDrink = Drink.query.filter_by(id=drink_id).first()
+        
+        # updatedDrink = Drink.query.filter_by(id=drink_id).first()
 
         return jsonify({
             'success': True,
-            'drinks': [updatedDrink.long()]
+            'drinks': [drinks.long()]
         }), 200
+        print('y!!!!!')
 
 
-    except:
+    except Exception as e:
+        print(e)
         abort(422)
+
+
 '''
 @TODO implement endpoint
     DELETE /drinks/<id>
@@ -182,9 +187,6 @@ def deleteDrinks(jwt, drink_id):
         abort(422)
 
 
-
-
-
 # Error Handling
 '''
 Example error handling for unprocessable entity
@@ -199,16 +201,6 @@ def unprocessable(error):
     }), 422
 
 
-'''
-@TODO implement error handlers using the @app.errorhandler(error) decorator
-    each error handler should return (with approprate messages):
-             jsonify({
-                    "success": False,
-                    "error": 404,
-                    "message": "resource not found"
-                    }), 404
-
-'''
 
 @app.errorhandler(400)
 def badRequest(error):
