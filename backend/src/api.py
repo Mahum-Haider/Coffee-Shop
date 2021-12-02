@@ -78,25 +78,24 @@ def drinksDetail(payload):
 @requires_auth('post:drinks')
 
 def postDrinks(payload):
+    body = request.get_json()
 
-    requestedId = request.form.get('id')
-    requestedTitle = request.form.get('title')
-    requestedRecipe = request.form.get('recipe')
+    requestedTitle = body.get('title', None)
+    requestedRecipe = body.get('recipe', None)
      # Get the response data
+    newDrink = Drink(
+        title=requestedTitle,
+        recipe=json.dumps(requestedRecipe)) #dumps - Converts a Python Object into a JSON String
     try:
-        Drink(id=requestedId,
-            title=requestedTitle, 
-            recipe=json.dumps(requestedRecipe)).insert() #dumps - Converts a Python Object into a JSON String
+        newDrink.insert()
 
-        drinks = Drink.query.all()
-        allDrinks = [drink.long() for drink in drinks]
         return jsonify({
             "success": True,
-            "drinks": allDrinks
+            "drinks": [newDrink.long()]
         }), 200
+        
     except:
         abort(422)
-
 
 
 
@@ -122,24 +121,19 @@ def patchDrinks(jwt, drink_id):
 
     try:
         drinks = Drink.query.filter_by(id=drink_id).one_or_none()
-        drinks.title = requestedTitle
-        drinks.recipe = json.dumps(requestedRecipe)
-        drinks.update()
-        print('yesss')
-
-        # drinks = Drink.query.filter_by(id=drink_id).one_or_none()
-        # if drinks is None:
-        #     abort(404)
-
+        if drinks is None:
+            abort(404)
         if (requestedTitle or requestedRecipe) is None:
             abort(400)
 
+        drinks.update()
+        print('yesss')
         
-        # updatedDrink = Drink.query.filter_by(id=drink_id).first()
+        updatedDrink = Drink.query.filter_by(id=drink_id).first()
 
         return jsonify({
             'success': True,
-            'drinks': [drinks.long()]
+            'drinks': [updatedDrink.long()]
         }), 200
         print('y!!!!!')
 
